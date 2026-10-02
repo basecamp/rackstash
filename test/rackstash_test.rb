@@ -117,7 +117,7 @@ describe Rackstash do
 
       log_lines.size.must_equal 1
       json["@tags"].must_equal ["foo"]
-      json["@message"].must_equal "   [INFO] Hello"
+      json["@message"].must_equal "Hello"
     end
 
     it "writes into the open buffer instead of a nested buffer" do
@@ -132,7 +132,7 @@ describe Rackstash do
 
       log_lines.size.must_equal 1
       json["@tags"].must_equal ["foo"]
-      json["@message"].must_equal "   [INFO] Started\n   [INFO] Completed"
+      json["@message"].must_equal "Started\nCompleted"
       json["@fields"]["status"].must_equal 200
       json["@fields"]["controller"].must_equal "documents"
       json["@fields"].keys.wont_include "child_log_ids"

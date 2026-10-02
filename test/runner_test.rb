@@ -37,7 +37,7 @@ describe Rackstash::Runner do
       stdin "Hello World"
       capture_json "capture"
 
-      json["@message"].must_equal "   [INFO] Hello World"
+      json["@message"].must_equal "Hello World"
       json["@source"].must_equal nil
       json["@tags"].must_equal []
       json["@fields"].keys.sort.must_equal %w[log_id pid]
