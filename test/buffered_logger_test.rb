@@ -67,7 +67,7 @@ describe Rackstash::BufferedLogger do
       %w[debug info warn error fatal unknown].each do |severity|
         subject.send severity, "log_#{severity}"
 
-        tag = "[#{severity.upcase}] ".rjust(10)
+        tag = %w[debug info].include?(severity) ? "" : "[#{severity.upcase}] "
         json["@message"].must_equal "#{tag}log_#{severity}"
       end
     end
@@ -80,7 +80,7 @@ describe Rackstash::BufferedLogger do
     it "ignores the instruction to not log a message" do
       subject.do_not_log!.must_equal false
       subject.info "Hello World"
-      json["@message"].must_equal "   [INFO] Hello World"
+      json["@message"].must_equal "Hello World"
     end
 
     it "includes the default fields" do
@@ -92,7 +92,7 @@ describe Rackstash::BufferedLogger do
 
       json["@fields"]["pid"].must_equal Process.pid
       json["@fields"]["log_id"].must_match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)
-      json["@message"].must_equal "   [INFO] Foo Bar Baz"
+      json["@message"].must_equal "Foo Bar Baz"
       json["@source"].must_be_nil
       json["@tags"].must_equal []
       # Timestamp is less than 2 seconds ago
@@ -103,12 +103,12 @@ describe Rackstash::BufferedLogger do
 
     it "allows to log nil" do
       subject.info nil
-      json["@message"].must_equal "   [INFO] "
+      json["@message"].must_equal ""
     end
 
     it "allows to log numerics" do
       subject.info 12.123
-      json["@message"].must_equal "   [INFO] 12.123"
+      json["@message"].must_equal "12.123"
     end
 
     it "allows to set a source" do
@@ -126,7 +126,7 @@ describe Rackstash::BufferedLogger do
         subject.info("World")
       end
 
-      json["@message"].must_equal "   [INFO] Hello\n   [INFO] World"
+      json["@message"].must_equal "Hello\nWorld"
     end
 
     it "can set additional tags" do
@@ -136,7 +136,7 @@ describe Rackstash::BufferedLogger do
       end
 
       json["@tags"].must_equal ["foo"]
-      json["@message"].must_equal "   [INFO] Hello"
+      json["@message"].must_equal "Hello"
     end
 
     it "can set additional tags for the duration of a block" do
@@ -154,7 +154,7 @@ describe Rackstash::BufferedLogger do
       end
 
       json["@fields"]["foo"].must_equal "bar"
-      json["@message"].must_equal "   [INFO] Hello"
+      json["@message"].must_equal "Hello"
     end
 
     it "can overwrite automatically filled fields" do
@@ -164,7 +164,7 @@ describe Rackstash::BufferedLogger do
       end
 
       json["@fields"]["pid"].must_equal "foobarbaz"
-      json["@message"].must_equal "   [INFO] Hello"
+      json["@message"].must_equal "Hello"
     end
 
     it "captures exceptions" do
@@ -214,7 +214,7 @@ describe Rackstash::BufferedLogger do
         subject.info("World")
       end
 
-      json["@message"].must_equal "   [INFO] Hello\n   [INFO] World"
+      json["@message"].must_equal "Hello\nWorld"
       json["@message"].wont_include "... (truncated) ..."
     end
 

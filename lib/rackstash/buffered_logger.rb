@@ -249,7 +249,10 @@ module Rackstash
     def format_log_line(line)
       msg = line[:message].to_s.gsub(/[\n\r]/, "\n")
       msg = msg.sub(/\A\n+/, '').sub(/\n\z/, '')
-      msg = "[#{Severities[line[:severity]]}] ".rjust(10) + msg
+      # Lines below WARN have no severity tag. Every buffered record is written
+      # at Rackstash.log_level, so the tag is how a reader finds the warning
+      # and error lines in a record.
+      msg = "[#{Severities[line[:severity]]}] #{msg}" if line[:severity] >= WARN
       msg.encode!(Encoding::UTF_8, :invalid => :replace, :undef => :replace) if msg.respond_to?(:encode!)
       msg
     end
