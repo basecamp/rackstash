@@ -113,8 +113,11 @@ module Rackstash
       buffer && buffer[:tags]
     end
 
+    # Rails::Rack::Logger in Rails 3.2 calls tagged with a single array of
+    # tags, which is empty unless config.log_tags is set. Flatten it so the
+    # tags are the array's elements and an empty array adds no tag.
     def tagged(*tags)
-      Rackstash.tagged(*tags) { yield }
+      Rackstash.tagged(*tags.flatten) { yield }
     end
 
     def source=(value)
