@@ -97,4 +97,55 @@ describe Rackstash do
       # TODO: fake a real request and ensure that the field gets set in the log output
     end
   end
+
+  describe "tagged" do
+    def log_lines
+      log_output.string.lines.map { |line| JSON.parse(line) }
+    end
+
+    before do
+      @original_logger = Rackstash.logger
+      Rackstash.logger = subject
+    end
+
+    after do
+      Rackstash.logger = @original_logger
+    end
+
+    it "opens a buffer when none is open" do
+      Rackstash.tagged("foo") { subject.info("Hello") }
+
+      log_lines.size.must_equal 1
+      json["@tags"].must_equal ["foo"]
+      json["@message"].must_equal "   [INFO] Hello"
+    end
+
+    it "writes into the open buffer instead of a nested buffer" do
+      subject.with_buffer do
+        subject.fields[:status] = 200
+        subject.info("Started")
+        Rackstash.tagged("foo") do
+          subject.fields[:controller] = "documents"
+          subject.info("Completed")
+        end
+      end
+
+      log_lines.size.must_equal 1
+      json["@tags"].must_equal ["foo"]
+      json["@message"].must_equal "   [INFO] Started\n   [INFO] Completed"
+      json["@fields"]["status"].must_equal 200
+      json["@fields"]["controller"].must_equal "documents"
+      json["@fields"].keys.wont_include "child_log_ids"
+      json["@fields"].keys.wont_include "parent_log_id"
+    end
+
+    it "adds no tag for the empty array from Rails::Rack::Logger" do
+      subject.with_buffer do
+        subject.tagged([]) { subject.info("Hello") }
+      end
+
+      log_lines.size.must_equal 1
+      json["@tags"].must_equal []
+    end
+  end
 end

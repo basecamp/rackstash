@@ -76,7 +76,14 @@ module Rackstash
   end
 
   def self.tagged(*tags, &block)
-    if block_given?
+    if block_given? && logger.respond_to?(:buffering?) && logger.buffering?
+      # A buffer is already open, for example the one LogMiddleware opens for
+      # the request. Add the tags to that buffer and log the block's lines
+      # into it, so the request produces one log record instead of a parent
+      # record and a child record.
+      logger.tags.concat(tags)
+      yield
+    elsif block_given?
       original_tags = self.tags
       begin
         with_log_buffer do
