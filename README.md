@@ -134,6 +134,16 @@ end
 # level
 # By default: :info
 config.rackstash.log_level = :info
+
+# Write no log record for a request whose path is a file in public_path, for
+# example /robots.txt or /stylesheets/screen.css. This works like
+# config.assets.quiet in modern Rails.
+# By default: false
+config.rackstash.quiet_assets = true
+
+# The directory that holds the static files, for quiet_assets.
+# By default: Rails.public_path
+config.rackstash.public_path = Rails.root.join("public").to_s
 ```
 
 # Caveats
