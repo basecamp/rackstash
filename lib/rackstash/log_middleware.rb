@@ -10,6 +10,7 @@ module Rackstash
     def call(env)
       Rackstash.with_log_buffer do
         request = Rack::Request.new(env)
+        Rackstash.logger.do_not_log! if Rackstash.quiet_assets && asset?(request.path_info)
         fields = {
           :method => request.request_method,
           :scheme => request.scheme,
@@ -23,5 +24,15 @@ module Rackstash
         end
       end
     end
+
+    private
+      def asset?(path)
+        return false unless Rackstash.public_path
+
+        path = Rack::Utils.unescape(path)
+        return false if path.include?("..") || path.include?("\0")
+
+        File.file?(File.join(Rackstash.public_path, path))
+      end
   end
 end

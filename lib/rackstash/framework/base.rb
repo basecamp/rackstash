@@ -10,6 +10,9 @@ module Rackstash
 
         Rackstash.tags = config.rackstash[:tags] || []
         Rackstash.request_tags = config.rackstash[:request_tags] || []
+
+        Rackstash.quiet_assets = config.rackstash[:quiet_assets] || false
+        Rackstash.public_path = config.rackstash[:public_path] || (Rails.public_path.to_s if defined?(Rails) && Rails.respond_to?(:public_path))
       end
     end
   end

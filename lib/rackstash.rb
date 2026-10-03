@@ -19,6 +19,14 @@ module Rackstash
   mattr_accessor :max_message_bytesize
   self.max_message_bytesize = 1_048_576
 
+  # When true, requests for a file in public_path write no log record, like
+  # config.assets.quiet in modern Rails. False by default.
+  mattr_accessor :quiet_assets
+  self.quiet_assets = false
+
+  # The directory that holds the static files. Used by quiet_assets.
+  mattr_accessor :public_path
+
   # Custom fields that will be merged with the log object when we
   # capture a request.
   #
